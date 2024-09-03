@@ -57,6 +57,8 @@ async function handleChangedSubjects(subjects: string[]) {
     })
     .join('\n');
 
+  // WARNING personally i would never put the values statement in this query so far away from
+  // its usage, but moving it inside the graph statement triggers a virtuoso error "no SPART_VARR_FIXED"
   update(`
     PREFIX dct: <http://purl.org/dc/terms/>
 
@@ -71,11 +73,11 @@ async function handleChangedSubjects(subjects: string[]) {
       }
     }
     WHERE {
+      VALUES (?subject ?type) {
+        ${subjectsAndTypesValues}
+      }
       GRAPH ?g {
         ?subject a ?type .
-        VALUES (?subject ?type) {
-          ${subjectsAndTypesValues}
-        }
         OPTIONAL { ?subject dct:modified ?modified }
       }
       ${filterModifiedSubjects}
